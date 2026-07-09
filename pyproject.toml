@@ -11,14 +11,14 @@ readme = "README.md"
 server = ["aiohttp"]
 
 [build-system]
-requires = ["uv_build>=0.11.16,<0.12"]
+requires = ["uv_build>=0.11.28,<0.12"]
 build-backend = "uv_build"
 
 [tool.uv.sources]
-torch = [{ index = "pytorch-cu130", marker = "platform_system != 'Darwin'" }]
-torchvision = [{ index = "pytorch-cu130", marker = "platform_system != 'Darwin'" }]
+torch = [{ index = "pytorch-cu132", marker = "platform_system != 'Darwin'" }]
+torchvision = [{ index = "pytorch-cu132", marker = "platform_system != 'Darwin'" }]
 
 [[tool.uv.index]]
-name = "pytorch-cu130"
-url = "https://download.pytorch.org/whl/cu130"
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
 explicit = true

@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     #################################
     ### Custom configuration area ###
-    dataset_root = Path("../data/streetview/data")
+    dataset_root = Path("D:/dataset/unlabeled2017")
 
     img_paths = google_street_view.get_paths(dataset_root)
     cls_num = 360
@@ -41,25 +41,27 @@ if __name__ == "__main__":
         batch_size=128,
         num_workers=num_workers,
         shuffle=True,
+        pin_memory=True,
         drop_last=True,
     )
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=128,
         num_workers=num_workers,
-        drop_last=True,
+        pin_memory=True,
+        drop_last=False,
     )
 
     model = RotNet(cls_num)
     model = model.to(device)
 
-    lr = 0.0008
+    lr = 0.001
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.LinearLR(optimizer, start_factor=1.0, total_iters=1)
     lr = LRManager(lr, scheduler, optimizer)
     loss = CrossEntropyLoss()
 
-    epochs = 1024
+    epochs = 256
     steps = 512
     trainer = Trainer(model, train_dataloader, val_dataloader, lr, loss, epochs, steps)
     ### Custom configuration area ###

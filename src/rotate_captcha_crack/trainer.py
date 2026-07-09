@@ -133,7 +133,7 @@ class Trainer:
 
         checkpoint_dir = self.finder.model_dir / CKPT_PATH
 
-        state_dict = torch.load(checkpoint_dir / "last.ckpt")
+        state_dict = torch.load(checkpoint_dir / "last.ckpt", weights_only=True)
         self.model.load_state_dict(state_dict["model"])
         self.lrm.load_state_dict(state_dict["lrm"])
 
@@ -171,11 +171,11 @@ class Trainer:
             self.log.debug(f"Epoch#{epoch_idx}. Training process.")
             with tqdm(total=self.steps) as tbar:
                 for source, target in self.train_dataloader:
-                    source: Tensor = source.to(device=device)
-                    target: Tensor = target.to(device=device)
+                    source: Tensor = source.to(device=device, non_blocking=True)
+                    target: Tensor = target.to(device=device, non_blocking=True)
 
-                    with self.lrm.optim_step():
-                        predict: Tensor = self.model(source)
+                    with self.lrm.step():
+                        predict = self.model(source)
                         loss: Tensor = self.loss(predict, target)
                         loss.backward()
 
@@ -195,8 +195,8 @@ class Trainer:
             eval_batch_count = 0
             with torch.no_grad():
                 for source, target in tqdm(self.val_dataloader):
-                    source: Tensor = source.to(device=device)
-                    target: Tensor = target.to(device=device)
+                    source: Tensor = source.to(device=device, non_blocking=True)
+                    target: Tensor = target.to(device=device, non_blocking=True)
 
                     predict: Tensor = self.model(source)
 
@@ -207,7 +207,6 @@ class Trainer:
             val_loss = total_val_loss / eval_batch_count
             self.val_loss_array[epoch_idx] = val_loss
 
-            self.lrm.sched_step(val_loss)
             self.lr_array[epoch_idx] = self.lrm.last_lr
 
             self.t_cost += time.perf_counter() - start_t

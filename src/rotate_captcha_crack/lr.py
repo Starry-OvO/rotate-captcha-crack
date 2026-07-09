@@ -24,18 +24,13 @@ class TypeLRManager(Protocol):
         """
         ...
 
-    def sched_step(self, val_loss: float) -> None:
-        """
-        lr_scheduler.step()
-        """
-        ...
-
     @contextlib.contextmanager
-    def optim_step(self) -> None:
+    def step(self) -> None:
         """
         optimizer.zero_grad()\n
         ...\n
         optimizer.step()
+        scheduler.step()
         """
         ...
 
@@ -62,16 +57,14 @@ class LRManagerWithValLoss(TypeLRManager):
 
     @property
     def last_lr(self) -> float:
-        self._scheduler._last_lr[0]
-
-    def sched_step(self, val_loss: float) -> None:
-        self._scheduler.step(metrics=val_loss)
+        return self._scheduler._last_lr[0]
 
     @contextlib.contextmanager
-    def optim_step(self) -> None:
+    def step(self) -> None:
         self._optimizer.zero_grad()
         yield
         self._optimizer.step()
+        self._scheduler.step()
 
 
 class LRManager(TypeLRManager):
@@ -100,13 +93,11 @@ class LRManager(TypeLRManager):
 
     @property
     def last_lr(self) -> float:
-        self._scheduler._last_lr[0]
-
-    def sched_step(self, _: float) -> None:
-        self._scheduler.step()
+        return self._scheduler._last_lr[0]
 
     @contextlib.contextmanager
-    def optim_step(self) -> None:
+    def step(self) -> None:
         self._optimizer.zero_grad()
         yield
         self._optimizer.step()
+        self._scheduler.step()

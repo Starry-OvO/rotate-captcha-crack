@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     #################################
     ### Custom configuration area ###
-    dataset_root = Path("../data/unlabeled2017")
+    dataset_root = Path("D:/dataset/unlabeled2017")
 
     img_paths = list(glob_imgs(dataset_root))
     cls_num = DEFAULT_CLS_NUM
@@ -42,21 +42,22 @@ if __name__ == "__main__":
         batch_size=128,
         num_workers=num_workers,
         shuffle=True,
+        pin_memory=True,
         drop_last=True,
     )
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=128,
         num_workers=num_workers,
-        drop_last=True,
+        pin_memory=True,
+        drop_last=False,
     )
 
     model = RotNetR(cls_num)
     model = model.to(device)
 
-    lr = 0.001
-    momentum = 0.9
-    epochs = 1024
+    lr = 0.002
+    epochs = 256
     steps = 512
 
     pgroups = [], [], []  # optimizer parameter groups
@@ -74,7 +75,7 @@ if __name__ == "__main__":
                 # weight (with decay)
                 pgroups[0].append(param)
 
-    optimizer = torch.optim.AdamW(pgroups[2], lr=lr, betas=(momentum, 0.999), weight_decay=0.0)
+    optimizer = torch.optim.AdamW(pgroups[2], lr=lr, betas=(0.9, 0.999), weight_decay=0.0)
     optimizer.add_param_group({"params": pgroups[0], "weight_decay": 0.0005})  # add g0 with weight_decay
     optimizer.add_param_group({"params": pgroups[1], "weight_decay": 0.0})  # add g1 (BatchNorm2d weights)
 
